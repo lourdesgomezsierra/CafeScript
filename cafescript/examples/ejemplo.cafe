@@ -1,22 +1,63 @@
-Pedido cafe = 10
-
-Servir("Control de stock")
-
-SiHay(cafe > 0){
-    Servir("Hay cafe disponible")
-}
-Sino{
-    Servir("Sin stock")
-}
-
-Pedido cliente = TomarPedido("Nombre:")
-
-Servir("Bienvenido", cliente)
+Pedido cafe = 8
+Pedido te = 5
+Pedido medialuna = 4
+Pedido precioCafe = 1200
+Pedido precioTe = 900
+Pedido precioMedialuna = 700
+Pedido totalGeneral = 0
+Pedido seguir = 1
 
 Receta calcularTotal(precio, cantidad){
     Entregar precio * cantidad
 }
 
-Pedido total = calcularTotal(1200, 3)
+Servir("=== Proceso de pedido ===")
+Pedido nombreCliente = TomarPedido("Ingresa tu nombre:")
+Servir("Hola", nombreCliente, "! Bienvenido al pedido.")
 
-Servir("Total:", total)
+MientrasAbierto(seguir == 1){
+    Servir("Stock disponible y precios:")
+    Servir("1) Cafe - Stock:", cafe, "- Precio:", precioCafe)
+    Servir("2) Te - Stock:", te, "- Precio:", precioTe)
+    Servir("3) Medialuna - Stock:", medialuna, "- Precio:", precioMedialuna)
+    Pedido opcion = TomarPedido("Elige tu producto (1, 2 o 3):")
+    Pedido cantidad = TomarPedido("Cantidad que quieres comprar:")
+
+    SiHay(opcion == 1 and cantidad > 0 and cantidad <= cafe){
+        Pedido total = calcularTotal(precioCafe, cantidad)
+        cafe = cafe - cantidad
+        totalGeneral = totalGeneral + total
+
+        Servir("Has elegido", cantidad, "unidad/es de cafe")
+        Servir("Monto parcial:", total)
+        Servir("Monto total acumulado:", totalGeneral)
+    }
+    SinoSi(opcion == 2 and cantidad > 0 and cantidad <= te){
+        Pedido total = calcularTotal(precioTe, cantidad)
+        te = te - cantidad
+        totalGeneral = totalGeneral + total
+
+        Servir("Has elegido", cantidad, "unidad/es de te")
+        Servir("Monto parcial:", total)
+        Servir("Monto total acumulado:", totalGeneral)
+    }
+    SinoSi(opcion == 3 and cantidad > 0 and cantidad <= medialuna){
+        Pedido total = calcularTotal(precioMedialuna, cantidad)
+        medialuna = medialuna - cantidad
+        totalGeneral = totalGeneral + total
+
+        Servir("Has elegido", cantidad, "unidad/es de medialuna")
+        Servir("Monto parcial:", total)
+        Servir("Monto total acumulado:", totalGeneral)
+    }
+    Sino{
+        Servir("Producto no disponible o cantidad invalida")
+    }
+
+    Servir("\n")
+    seguir = TomarPedido("¿Deseas agregar otro producto? (1 = si, 0 = no):")
+}
+
+Servir("\n")
+Servir("Pedido final para", nombreCliente)
+Servir("Monto total final:", totalGeneral)

@@ -27,7 +27,8 @@ from ast_nodes import (
     Variable,
     WhileStmt,
 )
-from intermediate_representation import IRGenerator
+from code_generator import CodeGenerator
+from executor import ExecutionError, Executor
 from lexer import Lexer, LexicalError
 from semantic_analyzer import SemanticAnalyzer, SemanticError
 
@@ -147,13 +148,13 @@ def compile_source(source: str) -> tuple[list[Any], Any, Program, list[Any]]:
     parse_tree = parser.parse(source)
     ast = CafeScriptTransformer().transform(parse_tree)
     SemanticAnalyzer().analyze(ast)
-    ir = IRGenerator().generate(ast)
-    return tokens, parse_tree, ast, ir
+    code = CodeGenerator().generate(ast)
+    return tokens, parse_tree, ast, code
 
 
 def run_file(path: Path, args: argparse.Namespace) -> None:
     source = path.read_text(encoding="utf-8")
-    tokens, parse_tree, ast, ir = compile_source(source)
+    tokens, parse_tree, ast, code = compile_source(source)
 
     if args.show_tokens:
         print("=== TOKENS ===")
@@ -165,10 +166,17 @@ def run_file(path: Path, args: argparse.Namespace) -> None:
     if args.show_ast:
         print("=== AST ===")
         print(ast)
-    if args.show_ir:
-        print("=== IR ===")
-        for instruction in ir:
-            print(instruction)
+    if args.show_semantic:
+        print("=== ANALISIS SEMANTICO ===")
+        print("Analisis semantico completado sin errores.")
+    if args.show_code:
+        print("=== CODIGO GENERADO ===")
+        print(CodeGenerator().format_code(code))
+
+    if not args.no_execute:
+        if args.show_tokens or args.show_parse_tree or args.show_ast or args.show_semantic or args.show_code:
+            print("=== EJECUCION ===")
+        Executor(code).execute()
 
 
 def build_arg_parser() -> argparse.ArgumentParser:
@@ -177,7 +185,9 @@ def build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("--show-tokens", action="store_true", help="Muestra tokens del lexer")
     parser.add_argument("--show-parse-tree", action="store_true", help="Muestra el parse tree de Lark")
     parser.add_argument("--show-ast", action="store_true", help="Muestra el AST")
-    parser.add_argument("--show-ir", action="store_true", help="Muestra la representacion intermedia")
+    parser.add_argument("--show-semantic", action="store_true", help="Muestra confirmacion del analisis semantico")
+    parser.add_argument("--show-code", action="store_true", help="Muestra el codigo generado")
+    parser.add_argument("--no-execute", action="store_true", help="Genera codigo pero no lo ejecuta")
     return parser
 
 
@@ -193,6 +203,8 @@ def main() -> None:
         raise SystemExit(f"Error sintactico: {error}")
     except SemanticError as error:
         raise SystemExit(f"Error semantico: {error}")
+    except ExecutionError as error:
+        raise SystemExit(f"Error de ejecucion: {error}")
 
 
 if __name__ == "__main__":

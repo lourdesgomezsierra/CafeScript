@@ -1,13 +1,43 @@
 # CafeScript
 
-CafeScript es un compilador educativo escrito en Python para una materia de Teoria de la Computacion. El proyecto se enfoca solamente en cuatro fases fundamentales:
+CafeScript es un compilador educativo escrito en Python para una materia de Teoria de la Computacion. El proyecto muestra cuatro fases fundamentales de un compilador y termina ejecutando un codigo generado simple, legible y orientado a demostracion.
+
+## Fases
 
 1. Analisis lexico
 2. Analisis sintactico
 3. Analisis semantico
-4. Generacion de codigo intermedio
+4. Generacion de codigo
 
-El compilador no ejecuta programas. Su salida final es una Representacion Intermedia (IR) en codigo de tres direcciones.
+Flujo final:
+
+```text
+Codigo Fuente
+      |
+      v
+Analisis Lexico
+      |
+      v
+Tokens
+      |
+      v
+Analisis Sintactico
+      |
+      v
+Parse Tree
+      |
+      v
+AST
+      |
+      v
+Analisis Semantico
+      |
+      v
+Codigo Generado
+      |
+      v
+Ejecucion
+```
 
 ## Instalacion
 
@@ -17,28 +47,36 @@ Requiere Python 3.10+ y Lark:
 pip install -r requirements.txt
 ```
 
-## Uso
+## Uso Basico
 
-Compilar un programa CafeScript:
+Ejecutar un programa CafeScript:
 
 ```bash
-python cafescript/main.py cafescript/examples/control_stock.cafe
+python cafescript/main.py cafescript/examples/funciones.cafe
 ```
 
-Mostrar todas las fases:
+Mostrar todas las fases y ejecutar:
 
 ```bash
-python cafescript/main.py cafescript/examples/control_stock.cafe --show-tokens --show-parse-tree --show-ast --show-ir
+python cafescript/main.py cafescript/examples/funciones.cafe --show-tokens --show-parse-tree --show-ast --show-semantic --show-code
+```
+
+Generar codigo sin ejecutar:
+
+```bash
+python cafescript/main.py cafescript/examples/funciones.cafe --show-code --no-execute
 ```
 
 Opciones disponibles:
 
-| Opcion | Salida |
+| Opcion | Descripcion |
 | --- | --- |
-| `--show-tokens` | Tokens generados por el lexer |
-| `--show-parse-tree` | Arbol sintactico producido por Lark |
-| `--show-ast` | AST simplificado |
-| `--show-ir` | Codigo intermedio de tres direcciones |
+| `--show-tokens` | Muestra los tokens generados por el lexer |
+| `--show-parse-tree` | Muestra el Parse Tree generado por Lark |
+| `--show-ast` | Muestra el AST simplificado |
+| `--show-semantic` | Confirma que el analisis semantico termino sin errores |
+| `--show-code` | Muestra el codigo generado |
+| `--no-execute` | No ejecuta el codigo generado |
 
 ## Lenguaje
 
@@ -67,29 +105,25 @@ Operadores soportados:
 and or not
 ```
 
-## Ejemplo De Entrada
-
-```cafescript
-Pedido cafe = 10
-Pedido te = 5
-Pedido total = cafe + te
-
-Servir("Total:", total)
-```
-
 ## Fase 1: Analisis Lexico
 
-Archivo principal: `cafescript/lexer.py`
+Archivo: `cafescript/lexer.py`
 
-El lexer lee el codigo fuente caracter por caracter y produce tokens. Tambien detecta errores lexicos, por ejemplo caracteres invalidos o strings sin cerrar.
+El lexer lee el codigo fuente caracter por caracter y produce tokens. Tambien detecta errores lexicos, como caracteres invalidos o strings sin cerrar.
 
-Ejemplo:
+Entrada:
 
 ```cafescript
 Pedido cafe = 10
 ```
 
-Salida con `--show-tokens`:
+Comando:
+
+```bash
+python cafescript/main.py cafescript/examples/control_stock.cafe --show-tokens --no-execute
+```
+
+Salida esperada parcial:
 
 ```text
 TOKEN(PEDIDO, Pedido)
@@ -98,89 +132,141 @@ TOKEN(ASSIGN, =)
 TOKEN(NUMBER, 10)
 ```
 
-Tokens reconocidos:
-
-- Identificadores
-- Numeros enteros
-- Strings
-- Operadores aritmeticos
-- Operadores relacionales
-- Asignacion
-- Parentesis
-- Llaves
-- Corchetes
-- Comas
-- Palabras reservadas
-
 ## Fase 2: Analisis Sintactico
 
-Archivos principales:
+Archivos:
 
 - `cafescript/cafescript.lark`
 - `cafescript/main.py`
+- `cafescript/ast_nodes.py`
 
-Lark usa la gramatica de `cafescript.lark` para verificar que el programa tenga una estructura valida.
+La gramatica en Lark verifica que el programa tenga una estructura valida.
 
-Con `--show-parse-tree` se muestra el Parse Tree. Este arbol conserva muchos detalles de la gramatica concreta, como reglas intermedias y estructura sintactica completa.
+El **Parse Tree** muestra como el codigo encaja en las reglas concretas de la gramatica.
 
-Con `--show-ast` se muestra el AST. El AST es una version mas limpia y semantica del programa: elimina detalles innecesarios del parse tree y conserva nodos como declaraciones, expresiones, condicionales y funciones.
+El **AST** es una version mas limpia del programa. Conserva el significado principal y elimina detalles sintacticos innecesarios.
 
-Ejemplo conceptual:
+Comandos:
 
-```text
-Parse Tree: muestra como el texto encaja en cada regla gramatical.
-AST: muestra que operaciones representa el programa.
+```bash
+python cafescript/main.py cafescript/examples/funciones.cafe --show-parse-tree --no-execute
+python cafescript/main.py cafescript/examples/funciones.cafe --show-ast --no-execute
 ```
 
 ## Fase 3: Analisis Semantico
 
-Archivo principal: `cafescript/semantic_analyzer.py`
+Archivo: `cafescript/semantic_analyzer.py`
 
-Esta fase revisa que el programa tenga sentido mas alla de la sintaxis.
+Esta fase revisa que el programa tenga sentido despues de ser sintacticamente valido.
 
 Verifica:
 
 - Variables declaradas antes de usarse
-- Funciones declaradas antes de llamarse
+- Funciones declaradas
+- Uso correcto de identificadores
 - Cantidad correcta de argumentos
-- Uso valido de identificadores
 - Algunos errores basicos de tipos
+
+Comando:
+
+```bash
+python cafescript/main.py cafescript/examples/funciones.cafe --show-semantic --no-execute
+```
+
+Salida:
+
+```text
+=== ANALISIS SEMANTICO ===
+Analisis semantico completado sin errores.
+```
 
 Ejemplos de errores:
 
 ```text
-Variable 'x' no declarada.
-Funcion 'calcularTotal' no declarada.
-Funcion 'sumar' espera 2 argumentos y recibio 1.
+Error semantico: Variable 'x' no declarada.
+Error semantico: Funcion 'calcularTotal' no declarada.
+Error semantico: Funcion 'sumar' espera 2 argumentos y recibio 1.
 ```
 
-## Fase 4: Generacion De Codigo Intermedio
+## Fase 4: Generacion De Codigo
 
-Archivo principal: `cafescript/intermediate_representation.py`
+Archivos:
 
-Esta fase convierte el AST en una Representacion Intermedia (IR) de tres direcciones. La IR usa temporales automaticos para descomponer expresiones.
+- `cafescript/code_generator.py`
+- `cafescript/executor.py`
+
+El generador recorre el AST y produce instrucciones simples.
 
 Entrada:
 
 ```cafescript
-Pedido total = cafe + te
+Pedido cafe = 10
+Servir("Cafe disponible", cafe)
 ```
 
-Salida con `--show-ir`:
+Codigo generado:
 
 ```text
-t1 = cafe + te
-total = t1
+DECLARE cafe 10
+PRINT "Cafe disponible" cafe
 ```
 
-Para condicionales y ciclos, la IR usa etiquetas y saltos:
+Entrada:
+
+```cafescript
+SiHay(cafe > 0){
+    Servir("Hay cafe")
+}
+Sino{
+    Servir("Sin stock")
+}
+```
+
+Codigo generado:
 
 ```text
-JUMP_IF_FALSE t1 if_next_1
-PRINT t2
-JUMP if_end_2
-if_next_1:
-if_end_2:
+IF cafe > 0
+    PRINT "Hay cafe"
+ELSE
+    PRINT "Sin stock"
+END_IF
+```
+
+Comando:
+
+```bash
+python cafescript/main.py cafescript/examples/control_stock.cafe --show-code --no-execute
+```
+
+## Ejecucion
+
+La ejecucion se realiza usando el codigo generado. No se usa una maquina virtual compleja.
+
+Ejemplo:
+
+```bash
+python cafescript/main.py cafescript/examples/funciones.cafe --show-code
+```
+
+Salida esperada:
+
+```text
+=== CODIGO GENERADO ===
+FUNCTION doble(valor)
+    RETURN valor * 2
+END_FUNCTION
+FUNCTION esDisponible(stock)
+    RETURN stock > 0
+END_FUNCTION
+DECLARE stock doble(4)
+DECLARE disponible esDisponible(stock)
+IF disponible
+    PRINT "Stock calculado:" stock
+ELSE
+    PRINT "Sin stock"
+END_IF
+=== EJECUCION ===
+Stock calculado: 8
 ```
 
 ## Arquitectura
@@ -191,35 +277,8 @@ cafescript/
 |-- cafescript.lark
 |-- ast_nodes.py
 |-- semantic_analyzer.py
-|-- intermediate_representation.py
+|-- code_generator.py
+|-- executor.py
 |-- main.py
-|-- examples/
-`-- resultados/
-```
-
-## Flujo Del Compilador
-
-```text
-Codigo Fuente
-      |
-      v
-Analisis Lexico
-      |
-      v
-Lista de Tokens
-      |
-      v
-Analisis Sintactico
-      |
-      v
-Parse Tree
-      |
-      v
-AST
-      |
-      v
-Analisis Semantico
-      |
-      v
-Representacion Intermedia (IR)
+`-- examples/
 ```
