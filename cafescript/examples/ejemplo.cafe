@@ -1,0 +1,22 @@
+Pedido cafe = 10
+
+Servir("Control de stock")
+
+SiHay(cafe > 0){
+    Servir("Hay cafe disponible")
+}
+Sino{
+    Servir("Sin stock")
+}
+
+Pedido cliente = TomarPedido("Nombre:")
+
+Servir("Bienvenido", cliente)
+
+Receta calcularTotal(precio, cantidad){
+    Entregar precio * cantidad
+}
+
+Pedido total = calcularTotal(1200, 3)
+
+Servir("Total:", total)

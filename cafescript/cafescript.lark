@@ -1,0 +1,87 @@
+?start: program
+
+program: statement*
+
+?statement: var_decl
+          | assignment
+          | print_stmt
+          | if_stmt
+          | while_stmt
+          | for_stmt
+          | func_decl
+          | return_stmt
+          | expr_stmt
+
+var_decl: "Pedido" NAME "=" expr
+assignment: NAME "=" expr
+print_stmt: "Servir" "(" [arguments] ")"
+return_stmt: "Entregar" expr
+expr_stmt: expr
+
+if_stmt: "SiHay" "(" expr ")" block elif_clause* else_clause?
+elif_clause: "SinoSi" "(" expr ")" block
+else_clause: "Sino" block
+
+while_stmt: "MientrasAbierto" "(" expr ")" block
+for_stmt: "ParaCadaPedido" "(" NAME "en" expr ")" block
+
+func_decl: "Receta" NAME "(" [parameters] ")" block
+parameters: NAME ("," NAME)*
+arguments: expr ("," expr)*
+block: "{" statement* "}"
+
+?expr: or_expr
+?or_expr: and_expr
+        | or_expr OR and_expr -> binary_op
+?and_expr: equality
+         | and_expr AND equality -> binary_op
+?equality: comparison
+         | equality EQ comparison -> binary_op
+         | equality NEQ comparison -> binary_op
+?comparison: term
+           | comparison GT term -> binary_op
+           | comparison LT term -> binary_op
+           | comparison GTE term -> binary_op
+           | comparison LTE term -> binary_op
+?term: factor
+     | term PLUS factor -> binary_op
+     | term MINUS factor -> binary_op
+?factor: unary
+       | factor STAR unary -> binary_op
+       | factor SLASH unary -> binary_op
+?unary: NOT unary -> unary_op
+      | MINUS unary -> unary_op
+      | call
+?call: atom
+     | NAME "(" [arguments] ")" -> func_call
+     | "TomarPedido" "(" [arguments] ")" -> input_call
+?atom: NUMBER -> number
+     | STRING -> string
+     | "Disponible" -> true
+     | "Agotado" -> false
+     | NAME -> variable
+     | list_literal
+     | "(" expr ")"
+
+list_literal: "[" [arguments] "]"
+
+COMMENT: /#[^\n]*/
+OR: "or"
+AND: "and"
+NOT: "not"
+EQ: "=="
+NEQ: "!="
+GTE: ">="
+LTE: "<="
+GT: ">"
+LT: "<"
+PLUS: "+"
+MINUS: "-"
+STAR: "*"
+SLASH: "/"
+%import common.CNAME -> NAME
+%import common.SIGNED_NUMBER -> NUMBER
+%import common.ESCAPED_STRING -> STRING
+%import common.WS
+%ignore WS
+%ignore COMMENT

@@ -1,0 +1,11 @@
+Receta calcularTotal(precio, cantidad){
+    Entregar precio * cantidad
+}
+
+Pedido subtotal = calcularTotal(1200, 3)
+Pedido descuento = 500
+Pedido total = subtotal - descuento
+
+Servir("Subtotal:", subtotal)
+Servir("Descuento:", descuento)
+Servir("Total facturado:", total)

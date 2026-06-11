@@ -1,0 +1,1 @@
+"""CafeScript educational compiler package."""

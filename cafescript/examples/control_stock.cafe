@@ -1,0 +1,18 @@
+Pedido cafe = 10
+Pedido te = 0
+
+Servir("Control de stock")
+
+SiHay(cafe > 0){
+    Servir("Cafe disponible:", cafe)
+}
+Sino{
+    Servir("Cafe agotado")
+}
+
+SiHay(te > 0){
+    Servir("Te disponible")
+}
+Sino{
+    Servir("Te agotado")
+}

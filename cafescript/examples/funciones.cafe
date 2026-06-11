@@ -1,0 +1,17 @@
+Receta doble(valor){
+    Entregar valor * 2
+}
+
+Receta esDisponible(stock){
+    Entregar stock > 0
+}
+
+Pedido stock = doble(4)
+Pedido disponible = esDisponible(stock)
+
+SiHay(disponible){
+    Servir("Stock calculado:", stock)
+}
+Sino{
+    Servir("Sin stock")
+}

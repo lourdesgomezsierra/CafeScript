@@ -1,0 +1,15 @@
+Pedido contador = 1
+Pedido acumulado = 0
+
+MientrasAbierto(contador <= 5){
+    acumulado = acumulado + contador
+    contador = contador + 1
+}
+
+Servir("Suma:", acumulado)
+
+Pedido productos = ["cafe", "te", "medialuna"]
+
+ParaCadaPedido(producto en productos){
+    Servir("Producto:", producto)
+}

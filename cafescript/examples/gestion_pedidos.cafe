@@ -1,0 +1,11 @@
+Pedido pedidos = ["latte", "espresso", "capuccino"]
+Pedido contador = 0
+
+Servir("Gestion de pedidos")
+
+ParaCadaPedido(pedido en pedidos){
+    Servir("Preparando:", pedido)
+    contador = contador + 1
+}
+
+Servir("Pedidos preparados:", contador)
