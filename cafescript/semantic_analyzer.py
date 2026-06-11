@@ -47,9 +47,9 @@ class SemanticAnalyzer:
 
     def _declare_function(self, node: FunctionDecl) -> None:
         if node.name in self.functions:
-            raise SemanticError(f"Funcion redeclarada: {node.name}")
+            raise SemanticError(f"Funcion '{node.name}' redeclarada.")
         if len(set(node.params)) != len(node.params):
-            raise SemanticError(f"Parametros repetidos en funcion {node.name}")
+            raise SemanticError(f"Parametros repetidos en funcion '{node.name}'.")
         self.functions[node.name] = FunctionInfo(node.params)
 
     def _push_scope(self) -> None:
@@ -60,7 +60,7 @@ class SemanticAnalyzer:
 
     def _declare_var(self, name: str) -> None:
         if name in self.scopes[-1]:
-            raise SemanticError(f"Variable redeclarada en el mismo ambito: {name}")
+            raise SemanticError(f"Variable '{name}' redeclarada en el mismo ambito.")
         self.scopes[-1].add(name)
 
     def _is_declared(self, name: str) -> bool:
@@ -68,7 +68,7 @@ class SemanticAnalyzer:
 
     def _require_var(self, name: str) -> None:
         if not self._is_declared(name):
-            raise SemanticError(f"Variable no declarada: {name}")
+            raise SemanticError(f"Variable '{name}' no declarada.")
 
     def _analyze_block(self, statements: list[object]) -> None:
         for statement in statements:
@@ -148,11 +148,11 @@ class SemanticAnalyzer:
             return "list"
         if isinstance(node, FunctionCall):
             if node.name not in self.functions:
-                raise SemanticError(f"Funcion no declarada: {node.name}")
+                raise SemanticError(f"Funcion '{node.name}' no declarada.")
             expected = len(self.functions[node.name].params)
             if len(node.args) != expected:
                 raise SemanticError(
-                    f"Funcion {node.name} espera {expected} argumentos y recibio {len(node.args)}"
+                    f"Funcion '{node.name}' espera {expected} argumentos y recibio {len(node.args)}."
                 )
             for arg in node.args:
                 self._analyze_expr(arg)

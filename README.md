@@ -1,45 +1,63 @@
 # CafeScript
 
-CafeScript es un compilador educativo escrito en Python. Define un lenguaje con tematica de cafeteria y recorre las fases clasicas de un compilador academico: parsing, AST, analisis semantico, representacion intermedia, optimizacion, generacion de instrucciones para una maquina de pila e interpretacion.
+CafeScript es un compilador educativo escrito en Python para una materia de Teoria de la Computacion. El proyecto se enfoca solamente en cuatro fases fundamentales:
+
+1. Analisis lexico
+2. Analisis sintactico
+3. Analisis semantico
+4. Generacion de codigo intermedio
+
+El compilador no ejecuta programas. Su salida final es una Representacion Intermedia (IR) en codigo de tres direcciones.
 
 ## Instalacion
 
 Requiere Python 3.10+ y Lark:
 
 ```bash
-pip install lark
+pip install -r requirements.txt
 ```
 
-## Ejecutar
+## Uso
+
+Compilar un programa CafeScript:
 
 ```bash
 python cafescript/main.py cafescript/examples/control_stock.cafe
 ```
 
-Para ver las fases intermedias:
+Mostrar todas las fases:
 
 ```bash
-python cafescript/main.py cafescript/examples/control_stock.cafe --show-ast --show-ir --show-optimized-ir --show-bytecode
+python cafescript/main.py cafescript/examples/control_stock.cafe --show-tokens --show-parse-tree --show-ast --show-ir
 ```
+
+Opciones disponibles:
+
+| Opcion | Salida |
+| --- | --- |
+| `--show-tokens` | Tokens generados por el lexer |
+| `--show-parse-tree` | Arbol sintactico producido por Lark |
+| `--show-ast` | AST simplificado |
+| `--show-ir` | Codigo intermedio de tres direcciones |
 
 ## Lenguaje
 
-Palabras clave principales:
+Palabras reservadas principales:
 
 | CafeScript | Significado |
 | --- | --- |
-| `Pedido` | declaracion de variable |
-| `Servir` | salida por pantalla |
-| `TomarPedido` | entrada por teclado |
-| `SiHay` | `if` |
-| `SinoSi` | `elif` |
-| `Sino` | `else` |
-| `Disponible` | `True` |
-| `Agotado` | `False` |
-| `Receta` | funcion |
-| `Entregar` | retorno |
-| `MientrasAbierto` | `while` |
-| `ParaCadaPedido` | `for` |
+| `Pedido` | Declaracion de variable |
+| `Servir` | Salida |
+| `TomarPedido` | Entrada |
+| `SiHay` | Condicional `if` |
+| `SinoSi` | Condicional `elif` |
+| `Sino` | Condicional `else` |
+| `Disponible` | Booleano verdadero |
+| `Agotado` | Booleano falso |
+| `Receta` | Funcion |
+| `Entregar` | Retorno |
+| `MientrasAbierto` | Bucle `while` |
+| `ParaCadaPedido` | Bucle `for` |
 
 Operadores soportados:
 
@@ -49,68 +67,159 @@ Operadores soportados:
 and or not
 ```
 
-## Ejemplo
+## Ejemplo De Entrada
 
 ```cafescript
 Pedido cafe = 10
+Pedido te = 5
+Pedido total = cafe + te
 
-Servir("Control de stock")
-
-SiHay(cafe > 0){
-    Servir("Hay cafe disponible")
-}
-Sino{
-    Servir("Sin stock")
-}
-
-Pedido cliente = TomarPedido("Nombre:")
-Servir("Bienvenido", cliente)
-
-Receta calcularTotal(precio, cantidad){
-    Entregar precio * cantidad
-}
-
-Pedido total = calcularTotal(1200, 3)
 Servir("Total:", total)
 ```
 
-## Fases Del Compilador
+## Fase 1: Analisis Lexico
 
-1. **Analisis lexico y sintactico**: Lark lee `cafescript.lark` y produce un arbol parseado.
-2. **AST**: `ast_nodes.py` define nodos estructurados; `main.py` transforma el parse tree en AST.
-3. **Analisis semantico**: `semantic_analyzer.py` verifica variables y funciones declaradas, aridad de llamadas y errores basicos de tipos constantes.
-4. **IR**: `intermediate_representation.py` genera codigo de tres direcciones con temporales y etiquetas.
-5. **Optimizacion**: `ir_optimizer.py` aplica constant folding, constant propagation y dead code elimination.
-6. **Maquina de pila**: `stack_instructions.py` traduce la IR a instrucciones.
-7. **Interpretacion**: `stack_machine.py` ejecuta las instrucciones.
+Archivo principal: `cafescript/lexer.py`
 
-## Estructura
+El lexer lee el codigo fuente caracter por caracter y produce tokens. Tambien detecta errores lexicos, por ejemplo caracteres invalidos o strings sin cerrar.
+
+Ejemplo:
+
+```cafescript
+Pedido cafe = 10
+```
+
+Salida con `--show-tokens`:
+
+```text
+TOKEN(PEDIDO, Pedido)
+TOKEN(ID, cafe)
+TOKEN(ASSIGN, =)
+TOKEN(NUMBER, 10)
+```
+
+Tokens reconocidos:
+
+- Identificadores
+- Numeros enteros
+- Strings
+- Operadores aritmeticos
+- Operadores relacionales
+- Asignacion
+- Parentesis
+- Llaves
+- Corchetes
+- Comas
+- Palabras reservadas
+
+## Fase 2: Analisis Sintactico
+
+Archivos principales:
+
+- `cafescript/cafescript.lark`
+- `cafescript/main.py`
+
+Lark usa la gramatica de `cafescript.lark` para verificar que el programa tenga una estructura valida.
+
+Con `--show-parse-tree` se muestra el Parse Tree. Este arbol conserva muchos detalles de la gramatica concreta, como reglas intermedias y estructura sintactica completa.
+
+Con `--show-ast` se muestra el AST. El AST es una version mas limpia y semantica del programa: elimina detalles innecesarios del parse tree y conserva nodos como declaraciones, expresiones, condicionales y funciones.
+
+Ejemplo conceptual:
+
+```text
+Parse Tree: muestra como el texto encaja en cada regla gramatical.
+AST: muestra que operaciones representa el programa.
+```
+
+## Fase 3: Analisis Semantico
+
+Archivo principal: `cafescript/semantic_analyzer.py`
+
+Esta fase revisa que el programa tenga sentido mas alla de la sintaxis.
+
+Verifica:
+
+- Variables declaradas antes de usarse
+- Funciones declaradas antes de llamarse
+- Cantidad correcta de argumentos
+- Uso valido de identificadores
+- Algunos errores basicos de tipos
+
+Ejemplos de errores:
+
+```text
+Variable 'x' no declarada.
+Funcion 'calcularTotal' no declarada.
+Funcion 'sumar' espera 2 argumentos y recibio 1.
+```
+
+## Fase 4: Generacion De Codigo Intermedio
+
+Archivo principal: `cafescript/intermediate_representation.py`
+
+Esta fase convierte el AST en una Representacion Intermedia (IR) de tres direcciones. La IR usa temporales automaticos para descomponer expresiones.
+
+Entrada:
+
+```cafescript
+Pedido total = cafe + te
+```
+
+Salida con `--show-ir`:
+
+```text
+t1 = cafe + te
+total = t1
+```
+
+Para condicionales y ciclos, la IR usa etiquetas y saltos:
+
+```text
+JUMP_IF_FALSE t1 if_next_1
+PRINT t2
+JUMP if_end_2
+if_next_1:
+if_end_2:
+```
+
+## Arquitectura
 
 ```text
 cafescript/
-|-- main.py
+|-- lexer.py
 |-- cafescript.lark
 |-- ast_nodes.py
 |-- semantic_analyzer.py
 |-- intermediate_representation.py
-|-- ir_optimizer.py
-|-- stack_instructions.py
-|-- stack_machine.py
+|-- main.py
 |-- examples/
-|   |-- control_stock.cafe
-|   |-- gestion_pedidos.cafe
-|   |-- facturacion.cafe
-|   |-- funciones.cafe
-|   `-- ciclos.cafe
 `-- resultados/
 ```
 
-## Notas Didacticas
+## Flujo Del Compilador
 
-CafeScript no busca competir con lenguajes reales. Su objetivo es mostrar como se conectan las partes de un compilador:
-
-- La gramatica define que programas son validos.
-- El AST elimina detalles sintacticos y deja una estructura semantica.
-- La IR separa el frontend del backend.
-- Las optimizaciones trabajan sobre una forma simple y uniforme.
-- La maquina de pila ejecuta instrucciones pequenas y faciles de inspeccionar.
+```text
+Codigo Fuente
+      |
+      v
+Analisis Lexico
+      |
+      v
+Lista de Tokens
+      |
+      v
+Analisis Sintactico
+      |
+      v
+Parse Tree
+      |
+      v
+AST
+      |
+      v
+Analisis Semantico
+      |
+      v
+Representacion Intermedia (IR)
+```

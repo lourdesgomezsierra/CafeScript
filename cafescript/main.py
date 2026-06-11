@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from lark import Lark, Token, Transformer, v_args
+from lark import Lark, Token, Transformer, UnexpectedInput, v_args
 
 from ast_nodes import (
     Assignment,
@@ -28,10 +28,8 @@ from ast_nodes import (
     WhileStmt,
 )
 from intermediate_representation import IRGenerator
-from ir_optimizer import IROptimizer
-from semantic_analyzer import SemanticAnalyzer
-from stack_instructions import StackCodeGenerator
-from stack_machine import StackMachine
+from lexer import Lexer, LexicalError
+from semantic_analyzer import SemanticAnalyzer, SemanticError
 
 
 class CafeScriptTransformer(Transformer):
@@ -143,21 +141,27 @@ def load_parser() -> Lark:
     return Lark(grammar_path.read_text(encoding="utf-8"), parser="lalr", maybe_placeholders=False)
 
 
-def compile_source(source: str) -> tuple[Program, list[Any], list[Any], list[Any]]:
+def compile_source(source: str) -> tuple[list[Any], Any, Program, list[Any]]:
+    tokens = Lexer(source).tokenize()
     parser = load_parser()
     parse_tree = parser.parse(source)
     ast = CafeScriptTransformer().transform(parse_tree)
     SemanticAnalyzer().analyze(ast)
     ir = IRGenerator().generate(ast)
-    optimized_ir = IROptimizer().optimize(ir)
-    bytecode = StackCodeGenerator().generate(optimized_ir)
-    return ast, ir, optimized_ir, bytecode
+    return tokens, parse_tree, ast, ir
 
 
 def run_file(path: Path, args: argparse.Namespace) -> None:
     source = path.read_text(encoding="utf-8")
-    ast, ir, optimized_ir, bytecode = compile_source(source)
+    tokens, parse_tree, ast, ir = compile_source(source)
 
+    if args.show_tokens:
+        print("=== TOKENS ===")
+        for token in tokens:
+            print(token)
+    if args.show_parse_tree:
+        print("=== PARSE TREE ===")
+        print(parse_tree.pretty())
     if args.show_ast:
         print("=== AST ===")
         print(ast)
@@ -165,33 +169,30 @@ def run_file(path: Path, args: argparse.Namespace) -> None:
         print("=== IR ===")
         for instruction in ir:
             print(instruction)
-    if args.show_optimized_ir:
-        print("=== IR OPTIMIZADA ===")
-        for instruction in optimized_ir:
-            print(instruction)
-    if args.show_bytecode:
-        print("=== BYTECODE ===")
-        for index, instruction in enumerate(bytecode):
-            print(f"{index:04d}: {instruction}")
-
-    if not args.no_run:
-        StackMachine(bytecode).run()
 
 
 def build_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Compilador educativo CafeScript")
-    parser.add_argument("archivo", type=Path, help="Archivo .cafe a ejecutar")
+    parser.add_argument("archivo", type=Path, help="Archivo .cafe a compilar")
+    parser.add_argument("--show-tokens", action="store_true", help="Muestra tokens del lexer")
+    parser.add_argument("--show-parse-tree", action="store_true", help="Muestra el parse tree de Lark")
     parser.add_argument("--show-ast", action="store_true", help="Muestra el AST")
-    parser.add_argument("--show-ir", action="store_true", help="Muestra la IR sin optimizar")
-    parser.add_argument("--show-optimized-ir", action="store_true", help="Muestra la IR optimizada")
-    parser.add_argument("--show-bytecode", action="store_true", help="Muestra instrucciones de maquina de pila")
-    parser.add_argument("--no-run", action="store_true", help="Compila pero no ejecuta")
+    parser.add_argument("--show-ir", action="store_true", help="Muestra la representacion intermedia")
     return parser
 
 
 def main() -> None:
     args = build_arg_parser().parse_args()
-    run_file(args.archivo, args)
+    try:
+        run_file(args.archivo, args)
+    except FileNotFoundError:
+        raise SystemExit(f"Error: no existe el archivo {args.archivo}")
+    except LexicalError as error:
+        raise SystemExit(f"Error lexico: {error}")
+    except UnexpectedInput as error:
+        raise SystemExit(f"Error sintactico: {error}")
+    except SemanticError as error:
+        raise SystemExit(f"Error semantico: {error}")
 
 
 if __name__ == "__main__":
