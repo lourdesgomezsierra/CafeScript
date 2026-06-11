@@ -3,6 +3,9 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
+# Define la estructura basica del AST usado por el compilador.
+# Cada clase representa una pieza del programa: variables, expresiones, bloques y funciones.
+
 
 class Node:
     pass

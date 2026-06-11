@@ -2,6 +2,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+# Verifica que el programa tenga sentido antes de ejecutarlo.
+# Aqui se revisan nombres de variables, funciones y reglas del lenguaje.
+
 from ast_nodes import (
     Assignment,
     BinaryOp,
@@ -34,6 +37,8 @@ class FunctionInfo:
 
 
 class SemanticAnalyzer:
+    # Lleva el control de variables, funciones y alcance del programa.
+    # Sirve para detectar errores antes de correr el codigo.
     def __init__(self) -> None:
         self.scopes: list[set[str]] = [set()]
         self.functions: dict[str, FunctionInfo] = {}

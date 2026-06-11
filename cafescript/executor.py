@@ -6,6 +6,9 @@ from typing import Any, Callable
 from ast_nodes import BinaryOp, FunctionCall, InputCall, ListLiteral, Literal, UnaryOp, Variable
 from code_generator import CodeInstruction
 
+# Ejecuta las instrucciones generadas por el compilador.
+# Aqui se interpreta la forma intermedia y se producen los resultados reales.
+
 
 class ExecutionError(Exception):
     pass

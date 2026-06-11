@@ -32,8 +32,12 @@ from executor import ExecutionError, Executor
 from lexer import Lexer, LexicalError
 from semantic_analyzer import SemanticAnalyzer, SemanticError
 
+# Punto de entrada del compilador: esta parte inicia todo el proceso
+# desde leer el archivo .cafe hasta mostrar resultados y ejecutarlo.
+
 
 class CafeScriptTransformer(Transformer):
+    # Convierte la salida de Lark en nodos del AST de CafeScript.
     def program(self, items: list[Any]) -> Program:
         return Program(items)
 

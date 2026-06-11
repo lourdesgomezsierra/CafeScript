@@ -4,6 +4,9 @@ import json
 from dataclasses import dataclass, field
 from typing import Any
 
+# Traduce el AST a instrucciones simples que luego puede ejecutar el motor.
+# Esta etapa convierte la estructura del programa en una version mas facil de correr.
+
 from ast_nodes import (
     Assignment,
     BinaryOp,
@@ -36,6 +39,8 @@ class CodeInstruction:
 
 
 class CodeGenerator:
+    # Genera una representacion intermedia legible para la ejecucion.
+    # Pensemos en esto como un "código de paso intermedio".
     def generate(self, program: Program) -> list[CodeInstruction]:
         return self._generate_statements(program.statements)
 

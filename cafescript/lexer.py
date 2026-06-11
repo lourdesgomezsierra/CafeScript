@@ -2,6 +2,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+# Convierte el codigo fuente en tokens para que el parser lo entienda.
+# Cada palabra, numero o signo se clasifica en una categoria sencilla.
+
 
 class LexicalError(Exception):
     pass
@@ -19,6 +22,8 @@ class Token:
 
 
 class Lexer:
+    # Mapea palabras reservadas y simbolos del lenguaje a tipos de token.
+    # Esto es la primera etapa del compilador: reconocer el codigo.
     RESERVED = {
         "Pedido": "PEDIDO",
         "Servir": "SERVIR",
